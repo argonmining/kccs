@@ -74,7 +74,7 @@ export async function connect(provider: KaspaProvider) {
 
   provider.on("accountsChanged", (next: Address[]) => {
     if (next.length === 0) console.log("disconnected or locked");
-    else console.log("active account is now", next[0]);
+    else console.log("active disclosed address is now", next[0]);
   });
   provider.on("networkChanged", (id: NetworkId) => {
     console.log("network is now", id); // discard cached UTXOs, balances, etc.

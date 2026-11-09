@@ -256,7 +256,9 @@ export interface SwitchNetworkParams {
 
 /** params and result of every method, keyed by method name. */
 export interface KaspaRpcSchema {
+  /** Disclosed addresses, active disclosed address first (Section 1, Section 6.1). */
   kaspa_requestAccounts: { params: []; result: Address[] };
+  /** The same disclosed addresses, or [] when locked or unauthorized (Section 6.2). */
   kaspa_accounts: { params: []; result: Address[] };
   kaspa_networkId: { params: []; result: NetworkId };
   kaspa_signMessage: { params: [message: string, address: Address]; result: Hex };
