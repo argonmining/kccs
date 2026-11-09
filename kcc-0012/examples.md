@@ -119,6 +119,9 @@ const signed = await provider.request({
   method: "kaspa_signTransaction",
   params: [{ transaction: unsigned, signInputs: [{ index: 1, sighashType: 1 }] }],
 });
+// Input 1 may sit at an address kaspa_accounts did not return, if that
+// address belongs to an authorized account. The call does not add the
+// address to kaspa_accounts. An account the user did not authorize is 4100.
 
 const txid = await provider.request({
   method: "kaspa_sendRawTransaction",
