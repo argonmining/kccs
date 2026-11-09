@@ -330,3 +330,21 @@ async function readBalance(provider: KaspaProvider): Promise<AccountBalance | nu
 `kas` is sompi as a decimal string. It follows acceptance on the selected chain, so it can change with no `accountsChanged` event. An app that displays it calls the method again. `tokens`, when absent, is not a report of zero.
 
 A wallet that implements `kaspa_getBalance` does not add a fresh change address to `kaspa_accounts` merely because the address received change. A wallet that returns `4200` does add it, and emits `accountsChanged`. An app that received `null` above, for code `4200`, keeps summing disclosed addresses, including addresses that arrive through that event.
+
+## 10. App side: asking the wallet to send
+
+Omit `from` to spend the account of the active disclosed address. Pass `from` to spend only that address. A one-address account spends the same outputs either way. The result is the transaction id.
+
+```typescript
+const accountSend = await provider.request({
+  method: "kaspa_sendTransaction",
+  params: [{ outputs: [{ address: payTo, amount: "100000000" }] }],
+});
+
+const oneAddress = await provider.request({
+  method: "kaspa_sendTransaction",
+  params: [{ from: accounts[0], outputs: [{ address: payTo, amount: "100000000" }] }],
+});
+```
+
+`oneAddress` does not spend an undisclosed output of the same account. A covenant output is not an input of either call. The app builds that transaction and uses `kaspa_signInputs` or `kaspa_signTransaction`. If the wallet cannot cover the payment from the outputs it is willing to select, the error is `-32000` and it has no `submitted` member.
