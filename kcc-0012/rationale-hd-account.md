@@ -86,7 +86,29 @@ Section 7.7 already decided spendability from the key, not from the position of 
 </tr>
 <tr>
 <td>
-<b>What an origin may learn.</b> Disclosed addresses; a further address only when the user discloses it, so that it appears in <code>kaspa_accounts</code>; the aggregate <code>kas</code> and any reported <code>tokens</code>, with no breakdown; and, after submit, what the chain makes public. It must not learn a private key, an extended public key, a path, an address of an unauthorized account, or how many accounts exist. There is no balance event. <code>kas</code> is exact. Repeated balance reads and probes should be answered with <code>-32005</code>, with no substitute figure.
+<b><code>kaspa_getNotes</code> and <code>kaspa_requestReceiveAddress</code>.</b> Both are optional and apply only to the account of the active disclosed address. Notes are the balance set. <code>kaspa_getNotes</code> is the permission of that name. The first call prompts once. The prompt says the origin will receive every note of the account, including undisclosed addresses. The grant is per origin and lasts until <code>wallet_revokePermissions</code>. Later calls do not prompt. The call does not add addresses to <code>kaspa_accounts</code>. From the same view, the sompi sum equals <code>kas</code>. A receive address becomes disclosed, does not become the first element merely because it was requested, and the call does not prompt.
+<br><br>
+<a href="../kcc-0012.md#615-kaspa_getnotes">Section 6.15</a>,
+<a href="../kcc-0012.md#616-kaspa_requestreceiveaddress">Section 6.16</a>,
+<a href="../kcc-0012.md#613-permissions">Section 6.13</a>
+</td>
+<td>
+The note list is the cluster, so it needs consent, once. A prompt on every call would ask the user to approve the same disclosure again. The total stays a different method so that balance does not mean every outpoint. One new receive address is a disclosure the user already authorized the origin to ask for.
+</td>
+</tr>
+<tr>
+<td>
+<b>Decoded note.</b> When the wallet has decoded the covenant state, the note includes <code>state</code> (<code>Hex</code>, <code>EncodeState</code>). When that state is KCC-20, the note also includes <code>tokenAmount</code> (<code>Uint64</code>, <code>KCC20State.amount</code>). When the output is P2SH and the wallet can reconstruct the redeem script, the note includes <code>redeemScript</code> (<code>Hex</code>). These fields are public data: a public key or a key hash at most, never a private key, an extended key, or a path.
+<br><br>
+<a href="../kcc-0012.md#615-kaspa_getnotes">Section 6.15</a>
+</td>
+<td>
+The token amount and the state live in the redeem script. The chain does not reveal that script until the output is spent. Without these fields an app cannot select the token note or build the transaction it passes to <code>kaspa_signInputs</code> or <code>kaspa_signTransaction</code>.
+</td>
+</tr>
+<tr>
+<td>
+<b>What an origin may learn.</b> Disclosed addresses; a further address when the user discloses it, when it calls <code>kaspa_requestReceiveAddress</code>, or in the notes once it holds <code>kaspa_getNotes</code>; the aggregate <code>kas</code> and any reported <code>tokens</code>, with no breakdown; and, after submit, what the chain makes public. A decoded note may include a public key or a key hash. It must not learn a private key, an extended public key, a path, an address of an unauthorized account, or how many accounts exist. There is no balance event. <code>kas</code> is exact. Repeated balance reads and probes should be answered with <code>-32005</code>, with no substitute figure.
 <br><br>
 <a href="../kcc-0012.md#security-considerations">Security Considerations</a>
 </td>
@@ -101,7 +123,7 @@ The total is useful only if it is the real sum, so the difference from a public-
 
 ### Does a single-address wallet, and an app written for one, still work?
 
-Yes. The account is that address ([Section 1](../kcc-0012.md#1-definitions)). `kaspa_accounts` returns it. When `from` is absent and when `from` is that address, the selected outputs are the same ([Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction)). A wallet that rejects `kaspa_getBalance` with `4200` still conforms, and it still discloses a fresh change address ([Backwards Compatibility](../kcc-0012.md#backwards-compatibility), [Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction)). An app that passes the active disclosed address as `from` still spends only that address.
+Yes. The account is that address ([Section 1](../kcc-0012.md#1-definitions)). `kaspa_accounts` returns it. When `from` is absent and when `from` is that address, the selected outputs are the same ([Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction)). A wallet that rejects `kaspa_getBalance`, `kaspa_getNotes`, or `kaspa_requestReceiveAddress` with `4200` still conforms, and it still discloses a fresh change address ([Backwards Compatibility](../kcc-0012.md#backwards-compatibility), [Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction)). An app that passes the active disclosed address as `from` still spends only that address.
 
 ### Why not return an extended public key?
 
@@ -109,7 +131,7 @@ An extended public key lets the origin derive every address of the account, pres
 
 ### Why is there no account-switch method?
 
-The active account is the wallet's selection, expressed as the first disclosed address ([Section 1](../kcc-0012.md#1-definitions)). The user changes it in the wallet. The provider emits `accountsChanged` ([Section 4.4](../kcc-0012.md#44-events)). An app must not require a switch in order to use a disclosed address ([Section 6.1](../kcc-0012.md#61-kaspa_requestaccounts)). A method that let the page change the selection would take that choice out of the wallet. An app that needs one disclosed address passes it to a method that takes an address: `from`, `kaspa_signMessage`, or `kaspa_signInputs`. `kaspa_getBalance` takes no account argument ([Section 6.14](../kcc-0012.md#614-kaspa_getbalance)).
+The active account is the wallet's selection, expressed as the first disclosed address ([Section 1](../kcc-0012.md#1-definitions)). The user changes it in the wallet. The provider emits `accountsChanged` ([Section 4.4](../kcc-0012.md#44-events)). An app must not require a switch in order to use a disclosed address ([Section 6.1](../kcc-0012.md#61-kaspa_requestaccounts)). A method that let the page change the selection would take that choice out of the wallet. An app that needs one disclosed address passes it to a method that takes an address: `from`, `kaspa_signMessage`, or `kaspa_signInputs`. `kaspa_getBalance`, `kaspa_getNotes`, and `kaspa_requestReceiveAddress` take no account argument ([Section 6.14](../kcc-0012.md#614-kaspa_getbalance), [Section 6.15](../kcc-0012.md#615-kaspa_getnotes), [Section 6.16](../kcc-0012.md#616-kaspa_requestreceiveaddress)).
 
 ### How does this relate to KCC-3 and to BIP-44?
 
@@ -137,7 +159,7 @@ An output is in the balance set when the account can move it alone ([Section 6.1
 
 Sompi on an output in the set is part of `kas`, including sompi on a covenant output. The token amount is not sompi and is not part of `kas`. `tokens`, when present, sums `KCC20State.amount` by `covenantId` and `commitment`. `covenantId` is 64 lowercase hex characters, the id [Section 7.5](../kcc-0012.md#75-serialized-transactions) already uses. `commitment` is KCC-20 `extension_commitment`, also 64 lowercase hex characters, and it is present for a KCC-20 total even when every byte is zero. Different commitments are different elements because KCC-20 Section 4 says those states are not fungible. An omitted `tokens` member is not a report of zero. `"tokens": []` means every total the wallet reports is zero, not that every covenant was decoded. Borrowed receive keeps the owner (KCC-20 Section 5), so the output stays in the set when the owner test still holds.
 
-A script that needs another party's key is not in the set. It can still take a partial signature under [Section 7.7](../kcc-0012.md#77-signature-scripts). `kaspa_sendTransaction` does not spend an output that carries a covenant id. The app builds that transaction and uses `kaspa_signInputs` or `kaspa_signTransaction`.
+A script that needs another party's key is not in the set. It can still take a partial signature under [Section 7.7](../kcc-0012.md#77-signature-scripts). `kaspa_sendTransaction` does not spend an output that carries a covenant id. The app builds that transaction and uses `kaspa_signInputs` or `kaspa_signTransaction`. When the wallet decoded the state, `kaspa_getNotes` returns the token amount, the state, and, for P2SH, the redeem script the app needs for that transaction ([Section 6.15](../kcc-0012.md#615-kaspa_getnotes)).
 
 ### Why is a multi-party position outside the balance?
 
@@ -149,15 +171,15 @@ A script that needs another party's key is not in the set. It can still take a p
 
 ### What if the wallet has several accounts?
 
-It may authorize more than one ([Section 1](../kcc-0012.md#1-definitions)). `kaspa_accounts` may list addresses from several of them ([Section 6.1](../kcc-0012.md#61-kaspa_requestaccounts)). The balance, and input selection when `from` is absent, use only the account that contains the first element ([Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction), [Section 6.14](../kcc-0012.md#614-kaspa_getbalance)). Another authorized account is excluded, even when one of its addresses appears later in the array. The user makes a different account active in the wallet. The app does not pass an account id. One address is never placed in two accounts ([Section 1](../kcc-0012.md#1-definitions)).
+It may authorize more than one ([Section 1](../kcc-0012.md#1-definitions)). `kaspa_accounts` may list addresses from several of them ([Section 6.1](../kcc-0012.md#61-kaspa_requestaccounts)). The balance, the notes, a new receive address, and input selection when `from` is absent all use only the account that contains the first element ([Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction), [Sections 6.14 to 6.16](../kcc-0012.md#614-kaspa_getbalance)). Another authorized account is excluded, even when one of its addresses appears later in the array. The user makes a different account active in the wallet. The app does not pass an account id. One address is never placed in two accounts ([Section 1](../kcc-0012.md#1-definitions)).
 
 ### Can a site infer funds it was not shown?
 
-Yes, the amount. Not the location. If `kas` is larger than the sum of the disclosed addresses read from a public node, the difference sits at undisclosed addresses of the same account ([Security Considerations](../kcc-0012.md#security-considerations)). The origin does not learn those addresses, their outpoints, or how many there are. If `kas` is smaller than that public sum, the cause may be another disclosed account, a stale view, or an output outside the balance set. That inequality is not proof of a second account.
+Yes, the amount. Not the location. If `kas` is larger than the sum of the disclosed addresses read from a public node, the difference sits at undisclosed addresses of the same account ([Security Considerations](../kcc-0012.md#security-considerations)). `kaspa_getBalance` does not reveal those addresses, their outpoints, or how many there are. `kaspa_getNotes` lists them after the origin holds that permission ([Section 6.15](../kcc-0012.md#615-kaspa_getnotes)). If `kas` is smaller than that public sum, the cause may be another disclosed account, a stale view, or an output outside the balance set. That inequality is not proof of a second account.
 
 ### Does an origin ever receive a key?
 
-No. The wallet decides spendability with keys it holds, and it does not return them ([Section 6.14](../kcc-0012.md#614-kaspa_getbalance), [Section 7.7](../kcc-0012.md#77-signature-scripts), [Security Considerations](../kcc-0012.md#security-considerations)). The origin receives a signature only from a signing method it called and the user approved ([Section 5.3](../kcc-0012.md#53-consent)). The other results are public data: disclosed addresses, amounts, and scripts. [Section 1](../kcc-0012.md#1-definitions) forbids an extended public key, a derivation path, and any value from which an app can derive an address. A result must not contain a private key.
+No. The wallet decides spendability with keys it holds, and it does not return them ([Section 6.14](../kcc-0012.md#614-kaspa_getbalance), [Section 7.7](../kcc-0012.md#77-signature-scripts), [Security Considerations](../kcc-0012.md#security-considerations)). The origin receives a signature only from a signing method it called and the user approved ([Section 5.3](../kcc-0012.md#53-consent)). The other results are public data: disclosed addresses, amounts, scripts, and the notes the origin was granted. A decoded note may carry a public key or a key hash in `state` or `redeemScript` ([Section 6.15](../kcc-0012.md#615-kaspa_getnotes)). That is public data. [Section 1](../kcc-0012.md#1-definitions) forbids an extended public key, a derivation path, and any value from which an app can derive an address. A result must not contain a private key.
 
 ### What about fingerprinting and rate limiting?
 
@@ -171,22 +193,22 @@ It calls `kaspa_getBalance` again ([Section 6.14](../kcc-0012.md#614-kaspa_getba
 
 | Situation | Code | Where |
 | --- | --- | --- |
-| The optional method is not implemented | `4200`, before any prompt and before parameter checks | [Section 4.1](../kcc-0012.md#41-request), [Section 6.14](../kcc-0012.md#614-kaspa_getbalance) |
-| Unauthorized, locked, or not an authorized account | `4100`, and no prompt when `kaspa_accounts` would be empty | Sections 5.4, 6.4, 6.5, and 6.14 |
+| The optional method is not implemented | `4200`, before any prompt and before parameter checks | [Section 4.1](../kcc-0012.md#41-request), Sections 6.14 to 6.16 |
+| Unauthorized, locked, or not an authorized account | `4100`, and no prompt when `kaspa_accounts` would be empty | Sections 5.4, 6.4, 6.5, and 6.14 to 6.16 |
 | The user rejects a prompt | `4001` | [Section 5.3](../kcc-0012.md#53-consent) |
 | Bad parameters, including a non-canonical `Uint64` or a wrong address prefix | `-32602` | [Section 7.2](../kcc-0012.md#72-unsigned-decimal-strings-and-amounts), Section 6.5 |
 | The selectable outputs cannot cover the payment, or the wallet cannot finish the script | `-32000`, before submit, no `submitted` member on a send | Sections 6.5 and 6.6 |
-| The origin is over a wallet limit, including a rate limit | `-32005`, no prompt | [Section 5.3](../kcc-0012.md#53-consent), Section 6.14 |
+| The origin is over a wallet limit, including a rate limit | `-32005`, no prompt | [Section 5.3](../kcc-0012.md#53-consent), Sections 6.14 and 6.15 |
 | The remote rejects a submitted transaction | `-32003` | Section 6.5, [Section 8](../kcc-0012.md#8-error-codes) |
 | Disconnected, and only for the four submit methods | `4900` | [Section 6](../kcc-0012.md#6-rpc-methods) |
 | A total does not fit in a `Uint64`, or any other failure | `-32603`, and the wallet must not truncate | Section 6.14 |
 
-`kaspa_signMessage` uses `4100` both for an undisclosed address and for an address of no authorized account, and the message must not say which ([Section 6.4](../kcc-0012.md#64-kaspa_signmessage)). `kaspa_getBalance` must not return `4900`.
+`kaspa_signMessage` uses `4100` both for an undisclosed address and for an address of no authorized account, and the message must not say which ([Section 6.4](../kcc-0012.md#64-kaspa_signmessage)). Balance, notes, and a receive address must not return `4900`. The user declining the notes prompt is `4001`, and the permission is not granted ([Section 6.15](../kcc-0012.md#615-kaspa_getnotes)).
 
-### Why is `kaspa_getBalance` optional?
+### Why are the new methods optional?
 
-The method table marks it Required: No. A wallet that only returns addresses would otherwise fail conformance. `4200` is how an app detects any method that is not required ([Section 4.1](../kcc-0012.md#41-request)). The change rule in [Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction) is what keeps an address-walking total complete when `kaspa_getBalance` is absent.
+The method table marks them Required: No. A wallet that only returns addresses would otherwise fail conformance. `4200` is how an app detects any method that is not required ([Section 4.1](../kcc-0012.md#41-request)). The change rule in [Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction) is what keeps an address-walking total complete when `kaspa_getBalance` is absent. `kaspa_getNotes` is a separate permission so a wallet can serve the total and refuse the cluster ([Section 6.13](../kcc-0012.md#613-permissions), [Section 6.15](../kcc-0012.md#615-kaspa_getnotes)).
 
 ### What should an app do when the wallet returns `4200`?
 
-`4200` means that method is not implemented. It is not `4100` and it is not `4001`. For `kaspa_getBalance`, sum the disclosed addresses on a public node and keep the `accountsChanged` listener: fresh change is disclosed, so the sum stays complete ([Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction)). Against a wallet that implements the method, that same sum is only the disclosed subset.
+`4200` means that method is not implemented. It is not `4100` and it is not `4001`. For `kaspa_getBalance`, sum the disclosed addresses on a public node and keep the `accountsChanged` listener: fresh change is disclosed, so the sum stays complete ([Section 6.5](../kcc-0012.md#65-kaspa_sendtransaction)). Against a wallet that implements the method, that same sum is only the disclosed subset. For `kaspa_getNotes`, the app has no note list. The total is a different method and may still exist. For `kaspa_requestReceiveAddress`, use a disclosed address, normally the first element ([Section 6.1](../kcc-0012.md#61-kaspa_requestaccounts)).
