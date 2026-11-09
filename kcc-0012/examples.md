@@ -351,3 +351,25 @@ const oneAddress = await provider.request({
 ```
 
 `oneAddress` does not spend an undisclosed output of the same account. A covenant output is not an input of either call. The app builds that transaction and uses `kaspa_signInputs` or `kaspa_signTransaction`. If the wallet cannot cover the payment from the outputs it is willing to select, the error is `-32000` and it has no `submitted` member.
+
+## 11. App side: notes and a receive address
+
+Both methods are optional. `kaspa_getNotes` is the permission `kaspa_getNotes`. The first call prompts. The prompt says that the origin will receive every note of the account, including addresses that were not disclosed. If the user approves, later calls do not prompt, until `wallet_revokePermissions` names that permission. The call does not add those addresses to `kaspa_accounts`. `kaspa_requestReceiveAddress` does not prompt. The address it returns becomes disclosed, and it does not become the first element only because it was requested.
+
+```typescript
+import type { Address, Note, ProviderRpcError } from "./interfaces";
+
+let notes: Note[] | null = null;
+try {
+  notes = await provider.request({ method: "kaspa_getNotes" });
+} catch (e) {
+  const err = e as ProviderRpcError;
+  if (err.code === 4200) notes = null; // this wallet has no note list
+  else if (err.code === 4001) notes = null; // user declined the permission
+  else throw err;
+}
+
+const receive: Address = await provider.request({ method: "kaspa_requestReceiveAddress" });
+```
+
+Code `4200` on either call means that method is absent. The other method is unaffected. An app that only needed a total uses `kaspa_getBalance` and does not call `kaspa_getNotes`. A later `kaspa_getNotes` from this origin does not prompt while the permission stands.

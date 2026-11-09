@@ -43,6 +43,17 @@ export interface AccountBalance {
   readonly kas: Amount;
   readonly tokens?: readonly TokenBalance[];
 }
+
+/** One output in the balance set, as kaspa_getNotes returns it (Section 6.15). */
+export interface Note {
+  readonly transactionId: TransactionId;
+  readonly index: number;
+  readonly amount: Amount;
+  readonly address?: Address;
+  readonly scriptPublicKey: Hex;
+  readonly covenantId?: Hex;
+  readonly commitment?: Hex;
+}
 /** Prefixed Kaspa address, e.g. "kaspa:qp...". */
 export type Address = string;
 /** JSON text in the Kaspa WASM SDK "safe" schema (Transaction.serializeToSafeJSON). */
@@ -284,6 +295,10 @@ export interface KaspaRpcSchema {
   kaspa_networkId: { params: []; result: NetworkId };
   /** Accepted balance of the active account. Optional. No prompt (Section 6.14). */
   kaspa_getBalance: { params: []; result: AccountBalance };
+  /** Notes of that account. Optional. Permission kaspa_getNotes (Section 6.15). */
+  kaspa_getNotes: { params: []; result: Note[] };
+  /** One receive address of that account, then disclosed (Section 6.16). */
+  kaspa_requestReceiveAddress: { params: []; result: Address };
   kaspa_signMessage: { params: [message: string, address: Address]; result: Hex };
   kaspa_sendTransaction: { params: [SendTransactionParams]; result: TransactionId };
   kaspa_signTransaction: { params: [SignTransactionParams]; result: SerializedTransaction };
