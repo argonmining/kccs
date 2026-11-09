@@ -330,7 +330,7 @@ async function readBalance(provider: KaspaProvider): Promise<AccountBalance | nu
 }
 ```
 
-`kas` is sompi as a decimal string. It follows acceptance on the selected chain, so it can change with no `accountsChanged` event. An app that displays it calls the method again. `tokens`, when absent, is not a report of zero.
+`kas` is sompi as a decimal string. It follows acceptance on the selected chain. A change of balance does not emit an event. An app that displays it calls the method again. The wallet may answer with `-32005`. `tokens`, when absent, is not a report of zero.
 
 A wallet that implements `kaspa_getBalance` does not add a fresh change address to `kaspa_accounts` merely because the address received change. A wallet that returns `4200` does add it, and emits `accountsChanged`. An app that received `null` above, for code `4200`, keeps summing disclosed addresses, including addresses that arrive through that event.
 
