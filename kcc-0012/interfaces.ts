@@ -53,6 +53,12 @@ export interface Note {
   readonly scriptPublicKey: Hex;
   readonly covenantId?: Hex;
   readonly commitment?: Hex;
+  /** KCC-20 KCC20State.amount when the wallet decoded that state. Not sompi. */
+  readonly tokenAmount?: Uint64;
+  /** Decoded covenant state. For KCC-20, EncodeState of that KCC20State. */
+  readonly state?: Hex;
+  /** P2SH redeem script, when the wallet can reconstruct it. */
+  readonly redeemScript?: Hex;
 }
 /** Prefixed Kaspa address, e.g. "kaspa:qp...". */
 export type Address = string;

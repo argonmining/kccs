@@ -373,3 +373,11 @@ const receive: Address = await provider.request({ method: "kaspa_requestReceiveA
 ```
 
 Code `4200` on either call means that method is absent. The other method is unaffected. An app that only needed a total uses `kaspa_getBalance` and does not call `kaspa_getNotes`. A later `kaspa_getNotes` from this origin does not prompt while the permission stands.
+
+On a note whose covenant state the wallet decoded, `tokenAmount` is the token amount and `state` is the decoded state. `redeemScript`, when present, is the P2SH script. The chain does not reveal that script until the note is spent. The app uses these fields to choose the note and to build the transaction it passes to `kaspa_signInputs` or `kaspa_signTransaction`. The fields hold public data: a public key or a key hash at most.
+
+```typescript
+const tokenNote = notes?.find((note) => note.tokenAmount !== undefined);
+// tokenNote?.state is EncodeState. tokenNote?.redeemScript is omitted when
+// the output is not P2SH or the wallet cannot reconstruct the script.
+```
