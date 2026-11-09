@@ -1,7 +1,7 @@
 {
   "kcc": 12,
   "section": "6.14 kaspa_getBalance",
-  "description": "kas is the sompi sum of the balance set, as a Uint64 string. tokens, when present, sums token amounts in that set, keyed by covenant id and extension commitment. A provider MUST NOT return a JSON number, a non-canonical Uint64, an address, an outpoint, a path, or an extended public key. accept results are results a consumer MUST accept. mustNotReturn results are results a provider MUST NOT produce.",
+  "description": "kas is the sompi sum of the balance set, as a Uint64 string. tokens, when present, sums token amounts in that set, keyed by covenant id and extension commitment. A provider MUST NOT return a JSON number, a non-canonical Uint64, an address, an outpoint, a path, or an extended public key. accept results are results a consumer MUST accept. mustNotReturn results are results a provider MUST NOT produce. In balanceSet, timeLockClear is false when a time lock does not yet allow the spend. That output is not in the set.",
   "accept": [
     {
       "kas": "0"
@@ -100,6 +100,7 @@
       "spentByUnaccepted": false,
       "movableAlone": true,
       "mature": true,
+      "timeLockClear": true,
       "disclosedAddress": true,
       "inBalanceSet": true
     },
@@ -110,6 +111,7 @@
       "spentByUnaccepted": false,
       "movableAlone": true,
       "mature": true,
+      "timeLockClear": true,
       "disclosedAddress": true,
       "inBalanceSet": false
     },
@@ -120,6 +122,7 @@
       "spentByUnaccepted": false,
       "movableAlone": true,
       "mature": true,
+      "timeLockClear": true,
       "disclosedAddress": true,
       "inBalanceSet": false
     },
@@ -130,6 +133,7 @@
       "spentByUnaccepted": true,
       "movableAlone": true,
       "mature": true,
+      "timeLockClear": true,
       "disclosedAddress": true,
       "inBalanceSet": true
     },
@@ -140,6 +144,18 @@
       "spentByUnaccepted": false,
       "movableAlone": true,
       "mature": false,
+      "timeLockClear": true,
+      "disclosedAddress": true,
+      "inBalanceSet": false
+    },
+    {
+      "name": "time-lock-not-expired",
+      "createdAccepted": true,
+      "spentByAccepted": false,
+      "spentByUnaccepted": false,
+      "movableAlone": true,
+      "mature": true,
+      "timeLockClear": false,
       "disclosedAddress": true,
       "inBalanceSet": false
     },
@@ -150,6 +166,7 @@
       "spentByUnaccepted": false,
       "movableAlone": true,
       "mature": true,
+      "timeLockClear": true,
       "disclosedAddress": false,
       "inBalanceSet": true
     },
@@ -160,6 +177,7 @@
       "spentByUnaccepted": false,
       "movableAlone": false,
       "mature": true,
+      "timeLockClear": true,
       "disclosedAddress": false,
       "inBalanceSet": false
     },
@@ -170,6 +188,7 @@
       "spentByUnaccepted": false,
       "movableAlone": true,
       "mature": true,
+      "timeLockClear": true,
       "disclosedAddress": true,
       "inBalanceSet": false
     }
