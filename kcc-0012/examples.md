@@ -306,3 +306,25 @@ port.onMessage.addListener((msg) => {
   window.postMessage({ channel: "com.example.wallet", ...msg }, window.location.origin);
 });
 ```
+
+## 9. App side: reading the account balance
+
+`kaspa_getBalance` is optional and does not prompt. Code `4200` means this wallet has no account total. The app then has the disclosed addresses only. Code `4100` means the origin is not authorized, or the wallet is locked. Neither code is a prompt.
+
+```typescript
+import type { AccountBalance, KaspaProvider, ProviderRpcError } from "./interfaces";
+
+async function readBalance(provider: KaspaProvider): Promise<AccountBalance | null> {
+  try {
+    return await provider.request({ method: "kaspa_getBalance" });
+  } catch (e) {
+    const err = e as ProviderRpcError;
+    if (err.code === 4200) return null; // sum disclosed addresses on a public node
+    if (err.code === 4100) return null; // unauthorized or locked; no prompt
+    if (err.code === -32005) return null; // the wallet rate-limited this origin
+    throw err;
+  }
+}
+```
+
+`kas` is sompi as a decimal string. It follows acceptance on the selected chain, so it can change with no `accountsChanged` event. An app that displays it calls the method again. `tokens`, when absent, is not a report of zero.
